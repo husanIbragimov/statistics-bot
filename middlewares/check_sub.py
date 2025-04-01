@@ -1,7 +1,7 @@
 from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import Message
-from data.config import CHANNEL_ID, ADMIN_ID
+from data.config import CHANNELS, ADMINS
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from keyboards.builders import check_channel_sub
 
@@ -19,7 +19,7 @@ class CheckSubs(BaseMiddleware):
         
         final_status = True
         unsubscribe_channels = []
-        for channel in CHANNEL_ID:
+        for channel in CHANNELS:
                 
             try:
                 
@@ -33,14 +33,14 @@ class CheckSubs(BaseMiddleware):
                 
             except TelegramBadRequest:
                 await event.bot.send_message(
-                    ADMIN_ID[0], 
+                    ADMINS[0],
                     f"Bot <a href='tg{link}'>{channel_name}</a>  admin emas. Kanalga admin qiling!"
                     )
                 continue
                 
             except Exception as err:
                 await event.bot.send_message(
-                    ADMIN_ID[0], 
+                    ADMINS[0],
                     f"Bot {channel} kanal navbatida xatolik: {err}"
                     )
                 continue
