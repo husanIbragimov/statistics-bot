@@ -1,5 +1,4 @@
 from aiogram.types import Message
-from typing import List
 from aiogram.filters import BaseFilter
 from data.config import ADMINS
 
