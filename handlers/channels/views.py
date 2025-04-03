@@ -5,7 +5,7 @@ from data import config
 from aiogram.types import Message, ChatMember, ChatMemberUpdated
 
 from filters import IsChannel
-from utils.db.models import User, Group, GroupStatistics
+from utils.db.models import User, Channel, GroupStatistics
 
 
 router = Router()
@@ -23,9 +23,9 @@ async def add_bot_group(message: Message, bot: Bot):
         }
     )
 
-    await Group.get_or_create(
+    await Channel.get_or_create(
         id=message.chat.id,
-        group_id=message.chat.id,
+        group_id=str(message.chat.id),
         defaults={
             'title': message.chat.title,
             'username': message.chat.username if message.chat.username else None,
@@ -34,7 +34,7 @@ async def add_bot_group(message: Message, bot: Bot):
         }
     )
     await GroupStatistics.update_or_create(
-        group_id=str(message.chat.id),
+        group_id=message.chat.id,
         date=message.date,
         status="daily",
         defaults={
@@ -47,31 +47,49 @@ async def add_bot_group(message: Message, bot: Bot):
 @router.channel_post()
 async def channel_post_handler(message: Message, bot: Bot):
 
-
-    stats, _ = await GroupStatistics.get_or_create(
-        group_id=str(message.chat.id),
-        status="daily",
-    )
-    print(message)
-    total_posts = stats.total_posts + 1
-    await GroupStatistics.update_or_create(
-        group_id=str(message.chat.id),
+    if stat := await GroupStatistics.filter(
+        id=message.chat.id,
         date=message.date,
         status="daily",
-        defaults={
-            "members": await bot.get_chat_member_count(message.chat.id, request_timeout=5),
-            "total_posts": total_posts,
-        }
-    )
+    ).first():
+        stat.total_posts += 1
+        await stat.save()
+    else:
+        await GroupStatistics.update_or_create(
+            group_id=message.chat.id,
+            date=message.date,
+            status="daily",
+            defaults={
+                "members": await bot.get_chat_member_count(message.chat.id, request_timeout=5),
+                "total_posts": 1,
+            }
+        )
 
 
 @router.message()
 async def message_post_handler(message: Message, bot: Bot):
-    print(message)
-    print(message.sender_chat.id)
-    print(message.chat.id)
+    
+    if group := await Channel.filter(
+        id=message.chat.id,
+    ).first():
+        if message.chat.id != message.sender_chat.id:
+            group.group_id = message.sender_chat.id
+            await group.save()
+    group, _ = await Channel.get_or_create(
+        id=message.chat.id,
+        group_id=int(message.chat.id),
+        defaults={
+            "group_id": str(message.chat.id),
+            "title": message.chat.title,
+            "group_type": message.chat.type,
+            "username": message.chat.username,
+            "who_added": message.from_user.id,
+        }
+    )
+    
+    print(message.chat.id, message.sender_chat.id)
     obj, _ = await GroupStatistics.get_or_create(
-        group_id=str(message.chat.id),
+        group_id=message.chat.id,
         date=message.date,
         status="daily",
         defaults={

@@ -2,8 +2,9 @@ from tortoise import fields
 from tortoise.models import Model
 
 
-class Group(Model):
-    id = fields.CharField(max_length=32, unique=True, db_index=True, primary_key=True)
+class Channel(Model):
+    id = fields.BigIntField(unique=True, db_index=True, primary_key=True)
+    parent = fields.ForeignKeyField("models.Channel", related_name="children~~", null=True)
     group_id = fields.CharField(max_length=16, unique=True, db_index=True)
     title = fields.CharField(max_length=100, null=True)
     group_type = fields.CharField(max_length=255, null=True)
@@ -12,12 +13,12 @@ class Group(Model):
     date_joined = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = "groups"
+        table = "channels"
 
 
 class GroupStatistics(Model):
     id = fields.IntField(pk=True)
-    group = fields.ForeignKeyField("models.Group", related_name="statistics")
+    group = fields.ForeignKeyField("models.Channel", related_name="statistics")
     members = fields.IntField(default=0)
     total_posts = fields.IntField(default=0)
     total_comments = fields.IntField(default=0)
@@ -28,4 +29,4 @@ class GroupStatistics(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = "group_statistics"
+        table = "channel_statistics"
