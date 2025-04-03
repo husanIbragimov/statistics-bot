@@ -7,6 +7,7 @@ router = Router()
 @router.message(CommandStart())
 async def register_user(message: types.Message):
     user, created = await User.get_or_create(
+        id=message.from_user.id,
         telegram_id=message.from_user.id,
         defaults={"username": message.from_user.username}
     )

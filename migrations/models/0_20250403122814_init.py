@@ -12,23 +12,26 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS "idx_users_telegra_ab91e9" ON "users" ("telegram_id");
-CREATE TABLE IF NOT EXISTS "group" (
-    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS "groups" (
+    "id" VARCHAR(32) NOT NULL PRIMARY KEY,
+    "group_id" VARCHAR(16) NOT NULL UNIQUE,
     "title" VARCHAR(100),
     "group_type" VARCHAR(255),
     "username" VARCHAR(100) UNIQUE,
     "date_joined" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "who_added_id" BIGINT REFERENCES "users" ("id") ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "groupstatistics" (
+CREATE INDEX IF NOT EXISTS "idx_groups_group_i_800c08" ON "groups" ("group_id");
+CREATE TABLE IF NOT EXISTS "group_statistics" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "members" INT NOT NULL DEFAULT 0,
     "total_posts" INT NOT NULL DEFAULT 0,
     "total_comments" INT NOT NULL DEFAULT 0,
     "deleted_posts" INT NOT NULL DEFAULT 0,
+    "views" INT NOT NULL DEFAULT 0,
     "status" VARCHAR(8) DEFAULT 'daily',
-    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "group_id" BIGINT NOT NULL REFERENCES "group" ("id") ON DELETE CASCADE
+    "created_at" DATE NOT NULL,
+    "group_id" VARCHAR(32) NOT NULL REFERENCES "groups" ("id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "aerich" (
     "id" SERIAL NOT NULL PRIMARY KEY,
