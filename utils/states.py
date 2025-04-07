@@ -6,3 +6,7 @@ class Form(StatesGroup):
     sex = State()
     about = State()
     photo = State()
+
+
+class LoadExcel(StatesGroup):
+    file = State()

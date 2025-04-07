@@ -3,8 +3,8 @@ from tortoise.models import Model
 
 
 class Group(Model):
-    id = fields.CharField(max_length=32, unique=True, db_index=True, primary_key=True)
-    group_id = fields.CharField(max_length=16, unique=True, db_index=True)
+    id = fields.BigIntField(pk=True)
+    parent = fields.ForeignKeyField("models.Group", related_name="children", null=True)
     title = fields.CharField(max_length=100, null=True)
     group_type = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=100, null=True, unique=True)

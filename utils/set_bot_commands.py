@@ -5,6 +5,7 @@ async def set_private_default_commands(bot):
     commands = [
         types.BotCommand(command="start", description="Botni qayta ishga tushirish"),
         types.BotCommand(command="help", description="Yordam olish"),
+        types.BotCommand(command="report", description="Hisobot olish"),
     ]
 
     await bot(SetMyCommands(commands=commands, scope=types.BotCommandScopeAllPrivateChats()))

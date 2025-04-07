@@ -6,7 +6,8 @@ load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 ADMINS = os.getenv('ADMINS').split(', ')
 CHANNELS = os.getenv('CHANNELS', '-1001275637856').split(', ')
-# print(CHANNEL_ID)
+API_ID = os.getenv('API_ID')
+API_HASH = os.getenv('API_HASH')
 
 # postgres
 DB_USER = os.getenv('DB_USER')

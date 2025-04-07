@@ -1,6 +1,6 @@
 from aiogram import Router, types
 from utils.db.models import User  
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import CommandStart
 
 router = Router()
 

@@ -1,5 +1,5 @@
 import asyncio
-from handlers import start, views
+from handlers import start, views, listen_chat, reports
 from middlewares.throttling import ThrottlingMiddleware
 from utils.bot_stop import on_shutdown_notify
 from utils.set_bot_commands import (
@@ -16,7 +16,9 @@ async def main():
 
     dp.include_routers(
         start.router,
+        reports.router,
         views.router,
+        listen_chat.router,
     )
 
     await set_private_default_commands(bot)

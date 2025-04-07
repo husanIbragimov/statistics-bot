@@ -7,3 +7,6 @@ tortoise-orm[asyncpg]~=0.24.0
 tomli_w~=1.2.0
 tomlkit~=0.13.2
 aerich~=0.8.1
+pandas==2.2.3
+openpyxl==3.1.5
+telethon==1.39.0
