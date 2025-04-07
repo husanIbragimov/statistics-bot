@@ -48,19 +48,18 @@ from datetime import date, timedelta
 import pandas as pd
 from aiogram.types import FSInputFile
 
+from data import config
 from utils.db.models import GroupStatistics
 from aiogram.filters import Command
-from filters import IsPrivateChat
+from filters import IsPrivateChat, IsAdmin
 
 router = Router()
 router.message.filter(IsPrivateChat())
 
 
-
-@router.message(Command("report"))
+@router.message(Command("report"), IsAdmin())
 async def get_reports(message: types.Message):
     await message.answer("Iltimos, kuting, hisobot tayyorlanmoqda...")
-
     # === 1. Sana oraliqlarini aniqlash ===
     today = date.today()
     start_of_week = today - timedelta(days=today.weekday())
