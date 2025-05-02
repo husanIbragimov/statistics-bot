@@ -12,7 +12,7 @@ router = Router()
 router.message.filter(IsChannel())
 
 @router.my_chat_member()
-async def bot_add_groups(message: Message, bot: Bot):
+async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
     try:
         await User.get_or_create(
             id=message.from_user.id,
