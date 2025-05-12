@@ -1,12 +1,9 @@
-from typing import Union
-from datetime import date
-from aiogram import Bot, Router, F
-from data import config
-from aiogram.types import Message, ChatMember, ChatMemberUpdated
+from aiogram import Bot, Router
+from aiogram.types import Message, ChatMemberUpdated
 
+from data import config
 from filters import IsChannel
 from utils.db.models import User, Group, GroupStatistics
-
 
 router = Router()
 router.message.filter(IsChannel())
@@ -51,7 +48,7 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
 
 @router.channel_post()
 async def channel_post_handler(message: Message, bot: Bot):
-    stats, _ = await GroupStatistics.update_or_create(
+    stats, _ = await GroupStatistics.get_or_create(
         group_id=message.chat.id,
         date=message.date,
         status="daily",
@@ -60,12 +57,14 @@ async def channel_post_handler(message: Message, bot: Bot):
         }
     )
     total_posts = stats.total_posts + 1
-    await GroupStatistics.update_or_create(
+    await GroupStatistics.filter(
+        date=message.date,
+        group_id=message.chat.id,
+        status="daily"
+    ).update(
         group_id=message.chat.id,
         date=message.date,
         status="daily",
-        defaults={
-            "members": await bot.get_chat_member_count(message.chat.id, request_timeout=5),
-            "total_posts": total_posts,
-        }
+        members=await bot.get_chat_member_count(message.chat.id, request_timeout=5),
+        total_posts=total_posts,
     )
