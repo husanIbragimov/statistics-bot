@@ -29,7 +29,7 @@ async def message_post_handler(message: Message, bot: Bot):
         date=message.date,
         status="daily",
         defaults={
-            "members": await bot.get_chat_member_count(message.chat.id, request_timeout=5),
+            "members": await bot.get_chat_member_count(message.chat.id),
             "total_comments": 1,
             "total_posts": 1
         }

@@ -53,7 +53,7 @@ async def channel_post_handler(message: Message, bot: Bot):
         date=message.date,
         status="daily",
         defaults={
-            "members": await bot.get_chat_member_count(message.chat.id, request_timeout=5),
+            "members": await bot.get_chat_member_count(message.chat.id),
         }
     )
     total_posts = stats.total_posts + 1
@@ -65,6 +65,6 @@ async def channel_post_handler(message: Message, bot: Bot):
         group_id=message.chat.id,
         date=message.date,
         status="daily",
-        members=await bot.get_chat_member_count(message.chat.id, request_timeout=5),
+        members=await bot.get_chat_member_count(message.chat.id),
         total_posts=total_posts,
     )
