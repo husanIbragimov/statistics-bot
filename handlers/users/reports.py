@@ -64,6 +64,7 @@ async def get_reports(message: types.Message):
     today = date.today()
     start_of_week = today - timedelta(days=today.weekday())
     start_date = start_of_week - timedelta(weeks=4)
+    print("Last 4 weeks", start_date)
 
     # === 2. Hisobot faylini tayyorlash ===
     file_name = f"hisobot-{start_date}_{today}.xlsx"
@@ -73,7 +74,8 @@ async def get_reports(message: types.Message):
 
     # === 3. Ma'lumotlarni olish (Query optimizatsiya) ===
     stats = await GroupStatistics.filter(
-        date__range=(start_date, today)
+        date__gte=start_date,
+        date__lte=today,
     ).select_related("group").values(
         "group__title", "group__username", "members",
         "total_posts", "total_comments", "deleted_posts",
