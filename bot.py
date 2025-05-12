@@ -24,7 +24,7 @@ async def main():
     await set_private_default_commands(bot)
     await on_startup_notify()
 
-    await bot.delete_webhook(drop_pending_updates=False)
+    await bot.delete_webhook(drop_pending_updates=True)
 
     try:
         await dp.start_polling(bot, skip_updates=True)
