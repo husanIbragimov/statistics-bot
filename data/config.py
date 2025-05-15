@@ -4,8 +4,8 @@ import os
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-ADMINS = os.getenv('ADMINS').split(', ')
-CHANNELS = os.getenv('CHANNELS', '-1001275637856').split(', ')
+ADMINS = os.getenv('ADMINS').split(',')
+CHANNELS = os.getenv('CHANNELS', '-1001275637856').split(',')
 API_ID = os.getenv('API_ID')
 API_HASH = os.getenv('API_HASH')
 
