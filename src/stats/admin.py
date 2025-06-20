@@ -13,8 +13,8 @@ from .models import Groups, GroupStatistics
 class GroupStatsInline(admin.TabularInline):
     model = GroupStatistics
     extra = 0
-    fields = ("members", "total_posts", "total_comments", "deleted_posts", "views", "date")
-    readonly_fields = ("members", "total_comments", "deleted_posts", "views")
+    fields = ("members", "total_posts", "date", "total_comments", "deleted_posts", "views")
+    readonly_fields = ("total_comments", "deleted_posts", "views")
 
 
 @admin.register(Groups)
