@@ -16,6 +16,9 @@ class Groups(models.Model):
         managed = False
         db_table = 'groups'
 
+    def __str__(self):
+        return self.title
+
 
 
 
@@ -38,3 +41,6 @@ class GroupStatistics(models.Model):
     class Meta:
         managed = False
         db_table = 'group_statistics'
+
+    def __str__(self):
+        return f"{self.date}"
