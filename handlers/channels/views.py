@@ -1,4 +1,4 @@
-from aiogram import Bot, Router
+from aiogram import Bot, Router, F
 from aiogram.types import Message, ChatMemberUpdated
 
 from data import config
@@ -29,13 +29,18 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
                 'group_type': message.chat.type,
             }
         )
-        await GroupStatistics.get_or_create(
+        total = await GroupStatistics.get_or_none(
+            group_id=message.chat.id,
+            date=message.date,
+            status="daily",
+        )
+        await GroupStatistics.update_or_create(
             group_id=message.chat.id,
             date=message.date,
             status="daily",
             defaults={
                 "members": await bot.get_chat_member_count(message.chat.id),
-                "total_posts": 0,
+                "total_posts": total.total_posts if total.total_posts == 0 else total.total_posts + 1,
                 "total_comments": 0
             }
         )
@@ -46,7 +51,7 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
             text=f"Error in bot_add_groups: {e}\nBot {message.chat.title} dan o'chirildi!"
         )
 
-@router.channel_post()
+@router.message(F.chat.type == "channel")
 async def channel_post_handler(message: Message, bot: Bot):
     stats, _ = await GroupStatistics.get_or_create(
         group_id=message.chat.id,
@@ -62,9 +67,6 @@ async def channel_post_handler(message: Message, bot: Bot):
         group_id=message.chat.id,
         status="daily"
     ).update(
-        group_id=message.chat.id,
-        date=message.date,
-        status="daily",
         members=await bot.get_chat_member_count(message.chat.id),
         total_posts=total_posts,
     )

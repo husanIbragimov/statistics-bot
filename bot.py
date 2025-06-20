@@ -18,7 +18,7 @@ async def main():
         start.router,
         reports.router,
         views.router,
-        listen_chat.router,
+        # listen_chat.router,
     )
 
     await set_private_default_commands(bot)
