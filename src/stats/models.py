@@ -37,7 +37,7 @@ class GroupStatistics(models.Model):
     views = models.IntegerField(default=0)
     status = models.CharField(max_length=8, choices=STATUS, default='daily')
     date = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     group = models.ForeignKey('Groups', models.DO_NOTHING)
 
     class Meta:
