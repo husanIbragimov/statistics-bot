@@ -30,11 +30,11 @@ class GroupStatistics(models.Model):
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),
     )
-    members = models.IntegerField()
-    total_posts = models.IntegerField()
-    total_comments = models.IntegerField()
-    deleted_posts = models.IntegerField()
-    views = models.IntegerField()
+    members = models.IntegerField(default=0)
+    total_posts = models.IntegerField(default=0)
+    total_comments = models.IntegerField(default=0)
+    deleted_posts = models.IntegerField(default=0)
+    views = models.IntegerField(default=0)
     status = models.CharField(max_length=8, choices=STATUS, default='daily')
     date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField()
