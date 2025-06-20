@@ -17,7 +17,9 @@ class Groups(models.Model):
         db_table = 'groups'
 
     def __str__(self):
-        return self.title
+        if self.title:
+            return self.title
+        return "Unnamed Group"
 
 
 

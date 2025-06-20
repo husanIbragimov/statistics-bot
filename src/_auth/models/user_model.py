@@ -14,4 +14,4 @@ class BotUser(models.Model):
         db_table = "users"
 
     def __str__(self):
-        return self.username
+        return f"{self.full_name}"
