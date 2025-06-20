@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # .env fayldan o'qish
+export $(grep -v '^#' .env | xargs)
 export $(grep -v '^#' .env.local | xargs)
 
 # Foydalanuvchidan fayl nomini so'rash
