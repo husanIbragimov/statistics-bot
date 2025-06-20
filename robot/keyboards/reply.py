@@ -33,7 +33,7 @@ maxsus_btn = ReplyKeyboardMarkup(
             KeyboardButton(text="contact", request_contact=True),
         ],
         [
-            KeyboardButton(text=" poll", request_poll=KeyboardButtonPollType()),
+            KeyboardButton(text="poll", request_poll=KeyboardButtonPollType()),
         ],
         [
             KeyboardButton(text="Orqaga")

@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+
+  robot:
+    build:
+      context: .
+      dockerfile: DockerfileBot
+    container_name: stats-bot
+    command: >
+      /bin/sh -c "
+                  while ! nc -z postgres_db 5432; do sleep 1; done;
+                  python bot.py"
+    volumes:
+      - ./robot:/app/robot
+      - ./static:/app/static
+      - ./media:/app/media
+    networks:
+      - shared_network
+    depends_on:
+      - postgres_db
+    env_file:
+      - .env
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stats-web
+    networks:
+      - shared_network
+    command: >
+      /bin/sh -c "
+                  while ! nc -z postgres_db 5432; do sleep 1; done;
+                  python manage.py collectstatic --noinput && 
+                  python manage.py migrate && 
+                  gunicorn --workers ${WORKERS_COUNT} --reload --bind 0.0.0.0:8000 config.wsgi:application"
+    volumes:
+      - ./src:/app/src
+      - ./static:/app/static
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres_db
+
+
+  postgres_db:
+    image: postgres:17.0
+    container_name: stats-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./.volumes/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5439:5432"
+
+    networks:
+      - shared_network
+
+
+
+networks:
+  shared_network:
+    driver: bridge

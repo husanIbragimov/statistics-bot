@@ -1,5 +1,6 @@
 import asyncio
-from handlers import start, views, listen_chat, reports
+from handlers.users import reports, start
+from handlers.channels import views
 from middlewares.throttling import ThrottlingMiddleware
 from utils.bot_stop import on_shutdown_notify
 from utils.set_bot_commands import (

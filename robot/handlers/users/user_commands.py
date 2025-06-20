@@ -11,7 +11,7 @@ router.message.filter(IsPrivateChat())
 
 @router.message(CommandStart(), IsAdmin())
 async def ping_pong(message: Message):
-    await message.answer(f'Hello admin <b>{message.from_user.full_name}!</b> start bosildi', reply_markup=reply.main,  parse_mode='Markdown')
+    await message.answer(f'Hello admin <b>{message.from_user.full_name}!</b> start bosildi', reply_markup=reply.main, parse_mode='Markdown')
 
 
 @router.message(CommandStart())
