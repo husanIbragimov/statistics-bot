@@ -1,13 +1,13 @@
-from django.contrib import admin
-from django.shortcuts import redirect
-from django.urls import path
-from django.http import HttpResponse
-from datetime import date, timedelta
-import pandas as pd
 import io
+from datetime import date, timedelta
+from django.db.models import Sum, Count
+
+import pandas as pd
+from django.contrib import admin
+from django.http import HttpResponse
+from django.urls import path
 
 from .models import Groups, GroupStatistics
-
 
 
 @admin.register(Groups)
@@ -29,18 +29,27 @@ class GroupsAdmin(admin.ModelAdmin):
         start_of_week = today - timedelta(days=today.weekday())
         start_date = start_of_week - timedelta(weeks=4)
 
-        stats = GroupStatistics.objects.filter(
-            date__gte=start_date,
-            date__lte=today
-        ).select_related("group").values(
-            "group__title", "group__username", "members",
-            "total_posts", "total_comments", "deleted_posts",
-            "views", "date"
+        # === 1. Aggregated Queryset ===
+        stats = (
+            GroupStatistics.objects.filter(
+                date__gte=start_date,
+                date__lte=today
+            )
+            .values("group__title", "group__username", "date")
+            .annotate(
+                members=Sum("members"),
+                total_posts=Sum("total_posts"),
+                total_comments=Sum("total_comments"),
+                deleted_posts=Sum("deleted_posts"),
+                views=Sum("views"),
+                records_count=Count("id")
+            )
         )
 
-        if not stats.exists():
-            return redirect("/admin/stats/groups/")
+        if not stats:
+            return HttpResponse("Ma'lumot topilmadi.", status=404)
 
+        # === 2. DataFrame yasash ===
         df = pd.DataFrame(stats)
         df.rename(columns={
             'group__title': 'Guruh',
@@ -50,17 +59,20 @@ class GroupsAdmin(admin.ModelAdmin):
             'total_comments': 'Izohlar',
             'deleted_posts': 'O‘chirilgan postlar',
             'views': 'Ko‘rishlar',
-            'date': 'Sana'
+            'date': 'Sana',
+            'records_count': 'Takroriy yozuvlar'
         }, inplace=True)
         df['Sana'] = pd.to_datetime(df['Sana'])
 
+        # === 3. Formatlab chiqarish ===
         display_rows = []
         for guruh_nomi, guruh_df in df.groupby('Guruh'):
             display_rows.append({
                 'Guruh': f"Guruh: {guruh_nomi}",
                 'Username': '', 'Members': '', 'Postlar': '',
-                'Izohlar': '', 'O‘chirilgan postlar': '', 'Ko‘rishlar': '', 'Sana': ''
+                'Izohlar': '', 'O‘chirilgan postlar': '', 'Ko‘rishlar': '', 'Sana': '', 'Takroriy yozuvlar': ''
             })
+
             guruh_df = guruh_df.sort_values(by='Sana', ascending=False)
             for _, row in guruh_df.iterrows():
                 display_rows.append({
@@ -71,11 +83,13 @@ class GroupsAdmin(admin.ModelAdmin):
                     'Izohlar': row['Izohlar'],
                     'O‘chirilgan postlar': row['O‘chirilgan postlar'],
                     'Ko‘rishlar': row['Ko‘rishlar'],
-                    'Sana': row['Sana'].strftime('%Y-%m-%d')
+                    'Sana': row['Sana'].strftime('%Y-%m-%d'),
+                    'Takroriy yozuvlar': int(row['Takroriy yozuvlar']),
                 })
 
         formatted_df = pd.DataFrame(display_rows)
 
+        # === 4. Haftalik o‘rtacha ko‘rsatkichlar ===
         weekly_avg = (
             df.groupby(['Guruh', 'Username'])[
                 ['Postlar', 'Izohlar', 'O‘chirilgan postlar', 'Ko‘rishlar']
@@ -85,7 +99,7 @@ class GroupsAdmin(admin.ModelAdmin):
             .reset_index()
         )
 
-        # Excel faylni xotirada yaratamiz
+        # === 5. Excelga yozish ===
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             formatted_df.to_excel(writer, sheet_name='Hisobot', index=False)
@@ -93,7 +107,7 @@ class GroupsAdmin(admin.ModelAdmin):
 
         output.seek(0)
         filename = f"hisobot_{start_date}_{today}.xlsx"
-
-        response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response = HttpResponse(output.read(),
+                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
