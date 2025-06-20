@@ -1,13 +1,20 @@
 import io
 from datetime import date, timedelta
-from django.db.models import Sum, Count
 
 import pandas as pd
 from django.contrib import admin
+from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.urls import path
 
 from .models import Groups, GroupStatistics
+
+
+class GroupStatsInline(admin.TabularInline):
+    model = GroupStatistics
+    extra = 0
+    fields = ("members", "total_posts", "total_comments", "deleted_posts", "views", "date")
+    readonly_fields = ("members", "total_comments", "deleted_posts", "views")
 
 
 @admin.register(Groups)
@@ -16,6 +23,7 @@ class GroupsAdmin(admin.ModelAdmin):
     search_fields = ("title", "username")
     list_filter = ("group_type", "date_joined")
     list_select_related = ("who_added",)
+    inlines = (GroupStatsInline,)
 
     def get_urls(self):
         urls = super().get_urls()
