@@ -5,7 +5,7 @@ import pandas as pd
 from django.contrib import admin
 from django.db.models import Sum, Count
 from django.http import HttpResponse
-from django.urls import path
+from django.urls import path, reverse
 
 from .models import Groups, GroupStatistics
 
@@ -24,13 +24,80 @@ class GroupsAdmin(admin.ModelAdmin):
     list_filter = ("group_type", "date_joined")
     list_select_related = ("who_added",)
     inlines = (GroupStatsInline,)
+    change_list_template = "admin/groups_change_list.html"  # custom template
+
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['monthly_report_url'] = reverse('admin:monthly-report')
+        return super().changelist_view(request, extra_context=extra_context)
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path("generate-report/", self.admin_site.admin_view(self.generate_report), name="generate-report"),
+            path("monthly-report/", self.admin_site.admin_view(self.monthly_report), name="monthly-report"),
         ]
         return custom_urls + urls
+
+    def monthly_report(self, request):
+        today = date.today()
+        current_year = today.year
+
+        stats = (
+            GroupStatistics.objects.filter(
+                date__year=current_year
+            )
+            .values("group__title", "group__username", "date")
+            .annotate(
+                members=Sum("members"),
+                total_posts=Sum("total_posts")
+            )
+        )
+
+        if not stats:
+            return HttpResponse("Ma'lumot topilmadi.", status=404)
+
+        df = pd.DataFrame(stats)
+        df.rename(columns={
+            'group__title': 'Guruh',
+            'group__username': 'Username',
+            'members': 'Members',
+            'total_posts': 'Postlar',
+            'date': 'Sana',
+        }, inplace=True)
+        df['Sana'] = pd.to_datetime(df['Sana'])
+        df['Oy'] = df['Sana'].dt.to_period('M')
+
+        # Oylik hisobot
+        monthly_stats = (
+            df.groupby(['Guruh', 'Username', 'Oy'])
+            .agg({
+                'Postlar': 'sum',
+                'Members': ['first', 'last', 'count']
+            })
+            .reset_index()
+        )
+        monthly_stats.columns = ['Guruh', 'Username', 'Oy', 'Postlar', 'Aʼzolar_boshi', 'Aʼzolar_oxiri', 'Kun_soni']
+        monthly_stats['Qo‘shilgan aʼzolar'] = (monthly_stats['Aʼzolar_oxiri'] - monthly_stats['Aʼzolar_boshi']).clip(
+            lower=0)
+        monthly_stats['Kunlik o‘rtacha'] = (monthly_stats['Qo‘shilgan aʼzolar'] / monthly_stats['Kun_soni']).round(2)
+
+        final_df = monthly_stats[[
+            'Guruh', 'Username', 'Oy', 'Postlar', 'Qo‘shilgan aʼzolar', 'Kunlik o‘rtacha'
+        ]]
+
+        # Excel faylga yozish
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            final_df.to_excel(writer, sheet_name='Oylik_hisobot', index=False)
+
+        output.seek(0)
+        filename = f"oylik_hisobot_{current_year}.xlsx"
+        response = HttpResponse(output.read(),
+                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
     def generate_report(self, request):
         today = date.today()
