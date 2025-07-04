@@ -103,7 +103,7 @@ class GroupsAdmin(admin.ModelAdmin):
     def generate_report(self, request):
         today = date.today()
         start_of_week = today - timedelta(days=today.weekday())
-        start_date = start_of_week - timedelta(weeks=4)
+        start_date = start_of_week - timedelta(weeks=2)  # 2 hafta oldin
 
         # === 1. Aggregated Queryset ===
         stats = (
