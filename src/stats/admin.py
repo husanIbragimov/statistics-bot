@@ -102,14 +102,20 @@ class GroupsAdmin(admin.ModelAdmin):
 
     def generate_report(self, request):
         today = date.today()
-        start_of_week = today - timedelta(days=today.weekday())
-        start_date = start_of_week - timedelta(weeks=2)  # 2 hafta oldin
+
+        # Bugungi haftaning boshlanishi (Dushanba)
+        start_of_this_week = today - timedelta(days=today.weekday())
+
+        # 2 hafta oldingi haftaning boshlanishi
+        start_date = start_of_this_week - timedelta(weeks=2)
+
+        # 2 hafta oldingi haftaning tugashi (Yakshanba) — boshlanish + 6 kun
+        end_date = start_date + timedelta(days=6)
 
         # === 1. Aggregated Queryset ===
         stats = (
             GroupStatistics.objects.filter(
-                date__gte=start_date,
-                date__lte=today
+                date__range=(start_date, end_date)
             )
             .values("group__title", "group__username", "date")
             .annotate(
