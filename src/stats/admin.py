@@ -30,6 +30,7 @@ class GroupsAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['monthly_report_url'] = reverse('admin:monthly-report')
+        extra_context['generate_report_url'] = reverse('admin:generate-report')
         return super().changelist_view(request, extra_context=extra_context)
 
     def get_urls(self):
