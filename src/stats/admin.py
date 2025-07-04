@@ -115,7 +115,7 @@ class GroupsAdmin(admin.ModelAdmin):
         # === 1. Aggregated Queryset ===
         stats = (
             GroupStatistics.objects.filter(
-                date__range=(start_date, end_date)
+                date__range=(end_date, start_date)
             )
             .values("group__title", "group__username", "date")
             .annotate(
