@@ -1,6 +1,6 @@
 import asyncio
 from handlers.users import reports, start
-from handlers.channels import views
+from handlers.channels import views, add_to_channel
 from middlewares.throttling import ThrottlingMiddleware
 from utils.bot_stop import on_shutdown_notify
 from utils.set_bot_commands import (
@@ -17,8 +17,9 @@ async def main():
 
     dp.include_routers(
         start.router,
-        reports.router,
+        add_to_channel.router,
         views.router,
+        reports.router,
         # listen_chat.router,
     )
 
