@@ -100,22 +100,25 @@ class GroupsAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
-    def generate_report(self, request):
+    @staticmethod
+    def get_last_two_weeks_range():
         today = date.today()
+        # Haftaning boshiga (dushanba) boramiz
+        weekday = today.weekday()  # 0 = dushanba
+        this_monday = today - timedelta(days=weekday)
 
-        # Bugungi haftaning boshlanishi (Dushanba)
-        start_of_this_week = today - timedelta(days=today.weekday())
+        # 2 hafta oldingi dushanbani topamiz
+        start_date = this_monday - timedelta(weeks=2)
+        end_date = this_monday + timedelta(days=6)  # Bu haftaning yakshanbasi
 
-        # 2 hafta oldingi haftaning boshlanishi
-        start_date = start_of_this_week - timedelta(weeks=2)
+        return start_date, end_date
 
-        # 2 hafta oldingi haftaning tugashi (Yakshanba) — boshlanish + 6 kun
-        end_date = start_date + timedelta(days=6)
+    def generate_report(self, request):
 
         # === 1. Aggregated Queryset ===
         stats = (
             GroupStatistics.objects.filter(
-                date__range=(start_date, end_date)
+                date__range=self.get_last_two_weeks_range()
             )
             .values("group__title", "group__username", "date")
             .annotate(
@@ -188,7 +191,7 @@ class GroupsAdmin(admin.ModelAdmin):
             weekly_avg.to_excel(writer, sheet_name='Haftalik', index=False)
 
         output.seek(0)
-        filename = f"hisobot_{start_date}_{today}.xlsx"
+        filename = f"hisobot_{date.today()}.xlsx"
         response = HttpResponse(output.read(),
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
