@@ -1,7 +1,8 @@
 from aiogram import Bot, Router
 from aiogram.types import ChatMemberUpdated
+
 from data.config import ADMINS
-from utils.db.models import GroupStatistics
+from utils.db.models import GroupStatistics, Group
 
 router = Router()
 router.message.filter()
@@ -9,6 +10,15 @@ router.message.filter()
 @router.channel_post()
 async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
     try:
+        await Group.get_or_create(
+            group_id=message.chat.id,
+            defaults={
+                "title": message.chat.title,
+                "username": message.chat.username,
+                "group_type": message.chat.type,
+                "date_joined": message.date,
+            }
+        )
         total = await GroupStatistics.get_or_none(
             group_id=message.chat.id,
             date=message.date,
