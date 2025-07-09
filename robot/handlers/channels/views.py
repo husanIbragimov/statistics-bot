@@ -7,7 +7,7 @@ from utils.db.models import GroupStatistics, Group
 router = Router()
 router.message.filter()
 
-@router.channel_post()
+@router.message()
 async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
     try:
         await Group.get_or_create(
