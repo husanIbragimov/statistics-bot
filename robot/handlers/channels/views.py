@@ -11,11 +11,11 @@ router.message.filter()
 async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
     try:
         await Group.get_or_create(
-            group_id=message.chat.id,
+            id=message.chat.id,
             defaults={
                 "title": message.chat.title,
-                "username": message.chat.username,
                 "group_type": message.chat.type,
+                "username": message.chat.username or None,
                 "date_joined": message.date,
             }
         )
