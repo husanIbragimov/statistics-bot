@@ -7,7 +7,7 @@ from utils.db.models import GroupStatistics, Group
 router = Router()
 router.message.filter()
 
-@router.message()
+@router.channel_post()
 async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
     try:
         await Group.get_or_create(
@@ -19,11 +19,11 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
                 "date_joined": message.date,
             }
         )
-        total = await GroupStatistics.get_or_none(
+        total = await GroupStatistics.filter(
             group_id=message.chat.id,
             date=message.date,
             status="daily",
-        )
+        ).first()
         await GroupStatistics.update_or_create(
             group_id=message.chat.id,
             date=message.date,
