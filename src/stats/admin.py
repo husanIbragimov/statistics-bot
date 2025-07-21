@@ -127,7 +127,6 @@ class GroupsAdmin(admin.ModelAdmin):
                 total_comments=Sum("total_comments"),
                 deleted_posts=Sum("deleted_posts"),
                 views=Sum("views"),
-                records_count=Count("id")
             )
         )
 
@@ -145,7 +144,6 @@ class GroupsAdmin(admin.ModelAdmin):
             'deleted_posts': 'O‘chirilgan postlar',
             'views': 'Ko‘rishlar',
             'date': 'Sana',
-            'records_count': 'Takroriy yozuvlar'
         }, inplace=True)
         df['Sana'] = pd.to_datetime(df['Sana'])
 
@@ -155,7 +153,7 @@ class GroupsAdmin(admin.ModelAdmin):
             display_rows.append({
                 'Guruh': f"Guruh: {guruh_nomi}",
                 'Username': '', 'Members': '', 'Postlar': '',
-                'Izohlar': '', 'O‘chirilgan postlar': '', 'Ko‘rishlar': '', 'Sana': '', 'Takroriy yozuvlar': ''
+                'Izohlar': '', 'O‘chirilgan postlar': '', 'Ko‘rishlar': '', 'Sana': '',
             })
 
             guruh_df = guruh_df.sort_values(by='Sana', ascending=False)
@@ -169,7 +167,6 @@ class GroupsAdmin(admin.ModelAdmin):
                     'O‘chirilgan postlar': row['O‘chirilgan postlar'],
                     'Ko‘rishlar': row['Ko‘rishlar'],
                     'Sana': row['Sana'].strftime('%Y-%m-%d'),
-                    'Takroriy yozuvlar': int(row['Takroriy yozuvlar']),
                 })
 
         formatted_df = pd.DataFrame(display_rows)
