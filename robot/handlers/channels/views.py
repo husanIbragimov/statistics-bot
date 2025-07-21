@@ -27,7 +27,6 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
         await GroupStatistics.update_or_create(
             group_id=message.chat.id,
             date=message.date,
-            status="daily",
             defaults={
                 "members": await bot.get_chat_member_count(message.chat.id),
                 "total_posts": 1 if not total else (total.total_posts + 1),

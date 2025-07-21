@@ -193,3 +193,9 @@ class GroupsAdmin(admin.ModelAdmin):
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
+
+
+
+@admin.register(GroupStatistics)
+class GroupStatisticsAdmin(admin.ModelAdmin):
+    ...
