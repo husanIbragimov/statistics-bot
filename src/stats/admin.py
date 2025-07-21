@@ -198,4 +198,4 @@ class GroupsAdmin(admin.ModelAdmin):
 
 @admin.register(GroupStatistics)
 class GroupStatisticsAdmin(admin.ModelAdmin):
-    ...
+    list_display = ("group_id", "date")
