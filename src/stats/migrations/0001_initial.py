@@ -37,6 +37,7 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(blank=True, max_length=8, null=True)),
                 ('date', models.DateField(blank=True, null=True)),
                 ('created_at', models.DateTimeField()),
+                ('group', models.ForeignKey(on_delete=models.DO_NOTHING, to='stats.groups')),
             ],
             options={
                 'db_table': 'group_statistics',

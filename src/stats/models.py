@@ -38,11 +38,14 @@ class GroupStatistics(models.Model):
     status = models.CharField(max_length=8, choices=STATUS, default='daily')
     date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    group = models.ForeignKey('Groups', models.DO_NOTHING)
+    group = models.ForeignKey('Groups', models.DO_NOTHING, related_name='statistics', null=True)
 
     class Meta:
         managed = False
         db_table = 'group_statistics'
+        constraints = [
+            models.UniqueConstraint(fields=['group', 'date'], name='unique_group_date')
+        ]
 
     def __str__(self):
         return f"{self.date}"
