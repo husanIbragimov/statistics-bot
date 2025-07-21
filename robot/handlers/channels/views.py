@@ -22,7 +22,6 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
         total = await GroupStatistics.filter(
             group_id=message.chat.id,
             date=message.date,
-            status="daily",
         ).first()
         await GroupStatistics.update_or_create(
             group_id=message.chat.id,
@@ -38,5 +37,5 @@ async def bot_add_groups(message: ChatMemberUpdated, bot: Bot):
         for admin in ADMINS:
             await bot.send_message(
                 chat_id=admin,
-                text=f"Error in bot_add_groups: {e}\nBot {message.chat.title} dan o'chirildi!"
+                text=f"Error: {e}\n\nKanal: {message.chat.title}!"
             )
